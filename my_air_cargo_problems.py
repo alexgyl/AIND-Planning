@@ -89,10 +89,10 @@ class AirCargoProblem(Problem):
             							expr("At({}, {})".format(plane, at))]
             			precond_neg = []
             			effect_add = [expr("At({}, {})".format(cargo, at))]
-            			effect_rem = [expr("In({}, {})".format(coargo, plane))]
+            			effect_rem = [expr("In({}, {})".format(cargo, plane))]
             			unload = Action(expr("Unload({}, {}, {})".format(cargo, plane, at)),
             							[precond_pos, precond_neg],
-            							[effet_add, effect_rem])
+            							[effect_add, effect_rem])
             			unloads.append(unload)
             return unloads
 
@@ -129,7 +129,13 @@ class AirCargoProblem(Problem):
         """
         # TODO implement
         possible_actions = []
-        # fs = decode_state(state, self.state_map)
+        # First construct a knowledge-base for the problem
+        kb = PropKB()
+        # Add all sentences to our knowledge-base
+        kb.tell(decode_state(state, self.state_map).pos_sentence())
+
+        for cur_action in self.actions_list:
+        	if cur_action.check_precond(kb, action.args)
 
         return possible_actions
 
@@ -218,28 +224,41 @@ def air_cargo_p2() -> AirCargoProblem:
     cargos = ['C1', 'C2', 'C3']
     planes = ['P1', 'P2', 'P3']
     airports = ['SFO', 'JFK', 'ATL']
-    pos = [expr('At(C1, SFO'),
-    	   expr('At(C2, JFK'),
-    	   expr('At(C3, ATL'),
-    	   expr('At(P1, SFO'),
-    	   expr('At(P2, JFK'),
-    	   expr('At(P3, ATL')]
-    neg = [expr('At(C1, JFK'),
-    	   expr('At(C1, ATL'),
-    	   expr('At(C2, SFO'),
-    	   expr('At(C2, ATL'),
-    	   expr('At(C3, SFO'),
-    	   expr('At(C3, JFK'),
-    	   expr('At(P1, JFK'),
-    	   expr('At(P1, ATL'),
-    	   expr('At(P2, SFO'),
-    	   expr('At(P2, ATL'),
-    	   expr('At(P3, SFO'),
-    	   expr('At(P3, JFK')]
-   	init = FluentState(pos, neg)
-   	goal = [expr('At(C1, JFK'),
-   			expr('At(C2, SFO'),
-   			expr('At(C3, SFO')]
+    pos = [expr('At(C1, SFO)'),
+           expr('At(C2, JFK)'),
+           expr('At(C3, ATL)'),
+           expr('At(P1, SFO)'),
+           expr('At(P2, JFK)'),
+           expr('At(P3, ATL)'),
+           ]
+    neg = [expr('At(C1, JFK)'),
+           expr('At(C1, ATL)'),
+           expr('In(C1, P1)'),
+           expr('In(C1, P2)'),
+           expr('In(C1, P3)'),
+           expr('At(C2, SFO)'),
+           expr('At(C2, ATL)'),
+           expr('In(C2, P1)'),
+           expr('In(C2, P2)'),
+           expr('In(C2, P3)'),
+           expr('At(C3, SFO)'),
+           expr('At(C3, JFK)'),
+           expr('In(C3, P1)'),
+           expr('In(C3, P2)'),
+           expr('In(C3, P3)'),
+           expr('At(P1, JFK)'),
+           expr('At(P1, ATL)'),
+           expr('At(P2, SFO)'),
+           expr('At(P2, ATL)'),
+           expr('At(P3, SFO)'),
+           expr('At(P3, JFK)'),
+           ]
+
+    init = FluentState(pos, neg)
+    goal = [expr('At(C1, JFK)'),
+            expr('At(C2, SFO)'),
+            expr('At(C3, SFO)'),
+            ]
     return AirCargoProblem(cargos, planes, airports, init, goal)
 
 
@@ -248,34 +267,45 @@ def air_cargo_p3() -> AirCargoProblem:
     cargos = ['C1', 'C2', 'C3', 'C4']
     planes = ['P1', 'P2']
     airports = ['SFO', 'JFK', 'ATL', 'ORD']
-    pos = [expr('At(C1, SFO'),
-    	   expr('At(C2, JFK'),
-    	   expr('At(C3, ATL'),
-    	   expr('At(C4, ORD'),
-    	   expr('At(P1, SFO'),
-    	   expr('At(P2, JFK')]
-    neg = [expr('At(C1, JFK'),
-    	   expr('At(C1, ATL'),
-    	   expr('At(C1, ORD'),
-    	   expr('At(C2, SFO'),
-    	   expr('At(C2, ATL'),
-    	   expr('At(C2, ORD'),
-    	   expr('At(C3, SFO'),
-    	   expr('At(C3, JFK'),
-    	   expr('At(C3, ORD'),
-    	   expr('At(C4, SFO'),
-    	   expr('At(C4, JFK'),
-    	   expr('At(C4, ATL'),
-    	   expr('At(P1, JFK'),
-    	   expr('At(P1, ATL'),
-    	   expr('At(P1, ORD'),
-    	   expr('At(P2, SFO'),
-    	   expr('At(P2, ATL'),
-    	   expr('At(P2, ORD')]
-   	init = FluentState(pos, neg)
-   	goal = [expr('At(C1, JFK'),
-   			expr('At(C2, SFO'),
-   			expr('At(C3, JFK'),
-   			expr('At(C4, SFO')]
+    pos = [expr('At(C1, SFO)'),
+           expr('At(C2, JFK)'),
+           expr('At(C3, ATL)'),
+           expr('At(C4, ORD)'),
+           expr('At(P1, SFO)'),
+           expr('At(P2, JFK)'),
+           ]
+    neg = [expr('At(C1, JFK)'),
+           expr('At(C1, ATL)'),
+           expr('At(C1, ORD)'),
+           expr('In(C1, P1)'),
+           expr('In(C1, P2)'),
+           expr('At(C2, SFO)'),
+           expr('At(C2, ATL)'),
+           expr('At(C2, ORD)'),
+           expr('In(C2, P1)'),
+           expr('In(C2, P2)'),
+           expr('At(C3, SFO)'),
+           expr('At(C3, JFK)'),
+           expr('At(C3, ORD)'),
+           expr('In(C3, P1)'),
+           expr('In(C3, P2)'),
+           expr('At(C4, SFO)'),
+           expr('At(C4, JFK)'),
+           expr('At(C4, ATL)'),
+           expr('In(C4, P1)'),
+           expr('In(C4, P2)'),
+           expr('At(P1, JFK)'),
+           expr('At(P1, ATL)'),
+           expr('At(P1, ORD)'),
+           expr('At(P2, SFO)'),
+           expr('At(P2, ATL)'),
+           expr('At(P2, ORD)'),
+           ]
+    init = FluentState(pos, neg)
+    goal = [expr('At(C1, JFK)'),
+            expr('At(C2, SFO)'),
+            expr('At(C3, JFK)'),
+            expr('At(C4, SFO)'),
+            ]
     return AirCargoProblem(cargos, planes, airports, init, goal)
 
