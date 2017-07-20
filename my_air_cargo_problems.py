@@ -133,9 +133,10 @@ class AirCargoProblem(Problem):
         kb = PropKB()
         # Add all sentences to our knowledge-base
         kb.tell(decode_state(state, self.state_map).pos_sentence())
-
+        # Check if action can be allowed via knowledge-base
         for cur_action in self.actions_list:
-        	if cur_action.check_precond(kb, action.args)
+        	if cur_action.check_precond(kb, cur_action.args):
+        		possible_actions.append(cur_action)
 
         return possible_actions
 
@@ -150,6 +151,16 @@ class AirCargoProblem(Problem):
         """
         # TODO implement
         new_state = FluentState([], [])
+
+        # Find the possible actions in current state
+        possible_actions = self.actions(state)
+        # Check if the incoming action is a valid one
+        if Action in possible_actions:
+        	kb = PropKB()
+        	kb.tell(decode(state, self.state_map).sentence())
+        	Action.act(kb, self.args)
+        	new_state = FluentState(kb.clauses, [])
+
         return encode_state(new_state, self.state_map)
 
     def goal_test(self, state: str) -> bool:
