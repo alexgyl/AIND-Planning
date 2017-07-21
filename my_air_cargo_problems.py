@@ -155,10 +155,10 @@ class AirCargoProblem(Problem):
         # Find the possible actions in current state
         possible_actions = self.actions(state)
         # Check if the incoming action is a valid one
-        if Action in possible_actions:
+        if action in possible_actions:
         	kb = PropKB()
         	kb.tell(decode(state, self.state_map).sentence())
-        	Action.act(kb, self.args)
+        	action.act(kb, action.args)
         	new_state = FluentState(kb.clauses, [])
 
         return encode_state(new_state, self.state_map)
