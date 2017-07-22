@@ -202,9 +202,13 @@ class AirCargoProblem(Problem):
 
         # Construct knowledge-base that will be used
         kb = PropKB()
+        # Fill up knowledge-base with the current state fluents
         kb.tell(decode_state(node.state, self.state_map).pos_sentence())
-        for fluent in kb.clauses
-        	if fluent not in self.goal:
+        # We want to check the number of goal fluents that are currently present
+        # If they are missing, increment count by 1 which indicates num of 
+        # fluents that need to be changed via actions!
+        for fluent in self.goal:
+        	if fluent not in kb.clauses:
         		count += 1
         
         return count
