@@ -152,14 +152,11 @@ class AirCargoProblem(Problem):
         # TODO implement
         new_state = FluentState([], [])
 
-        # Find the possible actions in current state
-        possible_actions = self.actions(state)
-        # Check if the incoming action is a valid one
-        if action in possible_actions:
-        	kb = PropKB()
-        	kb.tell(decode(state, self.state_map).sentence())
-        	action.act(kb, action.args)
-        	new_state = FluentState(kb.clauses, [])
+        # Act upon given action
+        kb = PropKB()
+        kb.tell(decode_state(state, self.state_map).sentence())
+        action.act(kb, action.args)
+        new_state = FluentState(kb.clauses, [])
 
         return encode_state(new_state, self.state_map)
 
