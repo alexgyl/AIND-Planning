@@ -349,6 +349,17 @@ class PlanningGraph():
         #   all of the new S nodes as children of all the A nodes that could produce them, and likewise add the A nodes to the
         #   parent sets of the S nodes
 
+        # Add in an empty set first
+        self.s_levels.append(set())
+        # Create a set of effects of the actions in the previous level
+        for action in self.a_levels[level - 1]:
+            # list comprehension: first we create a list of nodes that are part of the effect nodes
+            # then we cycle through this set of p_state_node (present_state_node) and add them to list of children
+            for p_state_node in [state_node for state_node in self.s_levels[level] if state_node in action.effnodes]:
+                p_state_node.parent.add(action)
+                action.children.add(p_state_node)
+                self.s_levels[level].add(p_state_node)
+
     def update_a_mutex(self, nodeset):
         """ Determine and update sibling mutual exclusion for A-level nodes
 
@@ -406,7 +417,12 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Inconsistent Effects between nodes
-        return False
+        if (node_a1.action.effect_add not in node_a2.action.effect_rem) and (node_a1.action.effect_rem not in node_a2.action.effect_add):
+            return True
+        else: 
+            return False
+
+        
 
     def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         """
