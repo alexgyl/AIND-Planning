@@ -324,7 +324,7 @@ class PlanningGraph():
                 # then we cycle through this set of p_state_node (precondition_state_node) and add them to our list of parents
                 for p_state_node in [state_node for state_node in self.s_levels[level] if state_node in action_node.prenodes]:
                     # Adding in parent nodes
-                    action_node.parents.add(p_state_node)
+                    action_node.parents.add(p_state_node)                    
                     # Adding child to the parent state node
                     p_state_node.children.add(action_node)
                     # Adding the current action node to the set
@@ -356,7 +356,7 @@ class PlanningGraph():
             # list comprehension: first we create a list of nodes that are part of the effect nodes
             # then we cycle through this set of p_state_node (present_state_node) and add them to list of children
             for p_state_node in [state_node for state_node in self.s_levels[level] if state_node in action.effnodes]:
-                p_state_node.parent.add(action)
+                p_state_node.parents.add(action)
                 action.children.add(p_state_node)
                 self.s_levels[level].add(p_state_node)
 
@@ -417,7 +417,10 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Inconsistent Effects between nodes
-        if (node_a1.action.effect_add not in node_a2.action.effect_rem) and (node_a1.action.effect_rem not in node_a2.action.effect_add):
+
+        # Check if we are adding this that the other is removing - use sets here to compare
+        if ((set(node_a1.action.effect_add) and set(node_a2.action.effect_rem)) or 
+            (set(node_a1.action.effect_rem) and set(node_a2.action.effect_add))):
             return True
         else: 
             return False
@@ -439,7 +442,14 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Interference between nodes
-        return False
+        # Check if removing a positive pre-condition or adding a negative pre-condition
+        if ((set(node_a1.action.effect_rem) and set(node_a2.action.precond_pos)) or
+            (set(node_a2.action.effect_rem) and set(node_a1.action.precond_pos)) or
+            (set(node_a1.action.effect_add) and set(node_a2.action.precond_neg)) or
+            (set(node_a2.action.effect_add) and set(node_a1.action.precond_neg))):
+            return True
+        else:
+            return False
 
     def competing_needs_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         """
@@ -453,7 +463,12 @@ class PlanningGraph():
         """
 
         # TODO test for Competing Needs between nodes
-        return False
+        # Check if the preconditions for the actions are opposites of each other
+        if ((set(node_a1.action.precond_pos) and set(node_a2.action.precond_neg)) or
+            (set(node_a2.action.precond_pos) and set(node_a1.action.precond_neg))):
+            return True
+        else:
+            return False
 
     def update_s_mutex(self, nodeset: set):
         """ Determine and update sibling mutual exclusion for S-level nodes
